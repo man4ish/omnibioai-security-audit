@@ -229,5 +229,5 @@ Planned enhancements:
 
 ## License
 
-MIT (or your organization license)
+MIT
 
