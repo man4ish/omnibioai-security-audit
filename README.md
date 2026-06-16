@@ -86,22 +86,33 @@ Common events tracked:
 
 ---
 
-## Installation
+## Running
+
+### Via OmniBioAI Studio (recommended)
 
 ```bash
-pip install redis pydantic fastapi
+cd ~/Desktop/machine/omnibioai-studio
+docker compose up -d security-audit
 ```
 
----
+Access (internal only):
+`http://security-audit:8004` (Docker internal network)
 
-## Environment Variables
+### Health check
 
 ```bash
-REDIS_URL=redis://localhost:6379
-AUDIT_STREAM=audit:events
-SERVICE_NAME=omnibioai-service
-AUDIT_MAXLEN=1000000
+curl http://localhost:8004/health
+# {"status": "ok"}
 ```
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `REDIS_URL` | `redis://redis:6379` | Redis Streams backend |
+| `AUDIT_STREAM` | `audit:events` | Stream name |
+| `SERVICE_NAME` | `omnibioai-security-audit` | Service identifier |
+| `AUDIT_MAXLEN` | `1000000` | Max stream length |
 
 ---
 
@@ -177,6 +188,19 @@ You can extend consumers for:
 
 ---
 
+## Testing
+
+```bash
+cd ~/Desktop/machine/omnibioai-security-audit
+pytest tests/ -v --cov=.
+
+# 99% coverage
+# Covers: audit logger, stream reader, decorators,
+#         context management, event types
+```
+
+---
+
 ## Design Principles
 
 ### 1. Never block core execution
@@ -215,19 +239,36 @@ This service integrates with:
 
 ---
 
-## Future Extensions
+## Roadmap
 
-Planned enhancements:
+| Feature | Status |
+|---------|--------|
+| Redis Streams audit backbone | ✓ Stable |
+| Async non-blocking logging | ✓ Stable |
+| Fail-open design | ✓ Stable |
+| Distributed trace ID support | ✓ Stable |
+| 99% test coverage | ✓ Stable |
+| OpenSearch / PostgreSQL sink | Planned |
+| Real-time security dashboard | Planned |
+| AI-based anomaly detection | Planned v0.5 |
+| Compliance reporting engine | Planned v0.5 |
 
-* OpenSearch / PostgreSQL sink
-* Real-time security dashboard
-* AI-based anomaly detection
-* Policy decision graph visualization
-* Compliance reporting engine
+---
+
+## Related Services
+
+| Service | Role |
+|---------|------|
+| `omnibioai-api-gateway` | Fires audit events on every request |
+| `omnibioai-auth` | Fires auth_login / auth_failed events |
+| `omnibioai-policy-engine` | Fires policy_decision events |
+| `omnibioai-iam-client` | Fires iam_cache_hit / iam_cache_miss events |
+| `omnibioai-security-sdk` | Provides fire_audit() helper used by all services |
+| `omnibioai-studio` | Manages security-audit container lifecycle |
 
 ---
 
 ## License
 
-MIT
+Apache 2.0
 
